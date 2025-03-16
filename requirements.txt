@@ -1,1 +1,75 @@
 pygame
+import pygame
+import math
+
+# Инициализация Pygame
+pygame.init()
+
+# Настройки экрана
+WIDTH, HEIGHT = 600, 400
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("I Love You Animation")
+
+# Шрифты и цвета
+font = pygame.font.Font(None, 80)
+text_color = (255, 0, 0)
+bg_color = (0, 0, 0)
+heart_color = (255, 0, 0)
+
+def draw_heart(surface, x, y, size, alpha):
+    """
+    Функция для рисования сердца на экране.
+    Использует два круга и треугольник для создания формы сердца.
+    """
+    heart_surface = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
+
+    # Рисуем два круга (верхняя часть сердца)
+    pygame.draw.circle(heart_surface, (heart_color[0], heart_color[1], heart_color[2], alpha),
+                       (size // 2, size // 2), size // 2)
+    pygame.draw.circle(heart_surface, (heart_color[0], heart_color[1], heart_color[2], alpha),
+                       (size + size // 2, size // 2), size // 2)
+
+    # Рисуем треугольник (нижняя часть сердца)
+    pygame.draw.polygon(heart_surface, (heart_color[0], heart_color[1], heart_color[2], alpha), [
+        (0, size // 2), (size, size * 1.5), (size * 2, size // 2)
+    ])
+
+    surface.blit(heart_surface, (x - size, y - size // 2))
+
+# Переменные анимации
+running = True
+clock = pygame.time.Clock()
+frame = 0
+max_frames = 120  # Длительность анимации
+
+while running:
+    screen.fill(bg_color)
+
+    # Эффект пульсации текста
+    scale = 1 - abs(math.sin(math.pi * (frame / max_frames))) * 0.5
+    text_surface = font.render("I Love You", True, text_color)
+    text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    scaled_surface = pygame.transform.smoothscale(text_surface,
+                                                  (int(text_rect.width * scale), int(text_rect.height * scale)))
+    scaled_rect = scaled_surface.get_rect(center=text_rect.center)
+
+    # Отображаем текст
+    screen.blit(scaled_surface, scaled_rect)
+
+    # Постепенное появление сердца
+    heart_alpha = int((frame / max_frames) * 255)
+    draw_heart(screen, WIDTH // 2, HEIGHT // 2 + 50, 40, heart_alpha)
+
+    pygame.display.flip()
+    clock.tick(30)
+
+    frame += 1
+    if frame > max_frames:
+        frame = 0  # Зацикливаем анимацию
+
+    # Обработка выхода
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+pygame.quit()
